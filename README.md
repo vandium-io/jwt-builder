@@ -1,5 +1,34 @@
 # jwt-builder
 
+Builds JSON Web Tokens (JWT) programatically.
+
+## Features
+* Easy to use chained API to create JWT
+* Works with HS256, HS384, HS512, and RS256
+* Great for unit testing services that use JWT
+
+## Installation
+Install via npm.
+
+	npm install jwt-builder --save
+
+## Getting Started
+
+The following example will build a JWT that will expire in 1 hour from now, signed with a HMAC-SHA256 signature.
+
+```js
+'use strict';
+
+const jwtBuilder = require( 'jwt-builder' );
+
+let token = jwtBuilder()
+                .nbf()             // can't be used before current time
+                .exp( 3600 )       // expire in 1 hour
+                .claims( { iss: 'https://auth.vandium.io' } )
+                .algorithm( 'HS256' )
+                .secret( 'super-secret' )
+                .build();
+```
 
 
 
