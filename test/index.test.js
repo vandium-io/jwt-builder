@@ -4,15 +4,16 @@
 
 const expect = require( 'chai' ).expect;
 
-const index = require( '..' );
+const builder = require( '..' );
 
 describe( 'lib/index', function() {
 
-    describe( '.builder', function() {
+    it( 'builder', function() {
 
-        let builder = index.builder();
+        expect( builder ).to.be.a( 'function' );
 
-        expect( builder ).to.exist;
-        expect( builder.constructor.name ).to.equal( 'JWTTokenBuilder' );
+        let instance = builder();
+
+        expect( instance.constructor.name ).to.equal( 'JWTTokenBuilder' );
     });
 });
