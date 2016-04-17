@@ -20,12 +20,102 @@ describe( 'lib/builder', function() {
 
         describe( 'constructor', function() {
 
-            it( 'normal operation', function() {
+            it( 'without config', function() {
 
                 let builder = new JWTTokenBuilder();
 
                 expect( builder._algorithm ).to.equal( 'HS256' );
                 expect( builder._claims ).to.eql( {} );
+            });
+
+            // should work with any algorithm
+            [
+                'HS256', 'HS384', 'HS512'
+
+            ].forEach( function( algorithm ) {
+
+                it( 'from config, iat = true, nbf = true, algorithm: ' + algorithm, function() {
+
+                    let config = {
+
+                        algorithm,
+                        iat: true,
+                        nbf: true,
+                        secret: 'super-secret',
+                        iss: 'https://auth.vandium.io',
+                        exp: 3600
+                    };
+
+                    let before = Math.floor( Date.now() / 1000 );
+
+                    let builder = new JWTTokenBuilder( config );
+
+                    let after = Math.floor( Date.now() / 1000 );
+
+                    expect( builder._algorithm ).to.equal( algorithm );
+                    expect( builder._secret ).to.equal( 'super-secret' );
+
+                    expect( builder._iat ).to.be.at.least( before );
+                    expect( builder._iat ).to.be.at.most( after );
+
+                    expect( builder._nbf ).to.be.at.least( before );
+                    expect( builder._nbf ).to.be.at.most( after );
+
+                    expect( builder._exp ).to.be.at.least( before + 3600 );
+                    expect( builder._exp ).to.be.at.most( after + 3600 );
+
+                    expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+                });
+
+                it( 'from config, algorithm: ' + algorithm, function() {
+
+                    let config = {
+
+                        algorithm,
+                        iat: Math.floor( Date.now() / 1000 ),
+                        nbf: Math.floor( Date.now() / 1000 ),
+                        secret: 'super-secret',
+                        iss: 'https://auth.vandium.io',
+                        exp: 3600
+                    };
+
+                    let builder = new JWTTokenBuilder( config );
+
+                    expect( builder._algorithm ).to.equal( algorithm );
+                    expect( builder._secret ).to.equal( 'super-secret' );
+
+                    expect( builder._iat).to.equal( config.iat );
+                    expect( builder._nbf ).to.equal( config.nbf );
+                    expect( builder._exp ).to.equal( config.iat + 3600 );
+
+                    expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+                });
+            });
+
+            it( 'from config, algorithm: RS256', function() {
+
+                let privateKey = keypair( { bits: 1024 } ).private;
+
+                let config = {
+
+                    algorithm: 'RS256',
+                    iat: Math.floor( Date.now() / 1000 ),
+                    nbf: Math.floor( Date.now() / 1000 ),
+                    privateKey,
+                    iss: 'https://auth.vandium.io',
+                    exp: 3600
+                };
+
+                let builder = new JWTTokenBuilder( config );
+
+                expect( builder._algorithm ).to.equal( 'RS256' );
+                expect( builder._key ).to.equal( privateKey );
+
+                expect( builder._iat).to.equal( config.iat );
+                expect( builder._nbf ).to.equal( config.nbf );
+                expect( builder._exp ).to.equal( config.iat + 3600 );
+
+                expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
             });
         });
 
