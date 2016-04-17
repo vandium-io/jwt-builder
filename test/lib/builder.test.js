@@ -1,0 +1,333 @@
+'use strict';
+
+/*jshint expr: true*/
+
+const expect = require( 'chai' ).expect;
+
+const keypair = require( 'keypair' );
+
+const temp = require( 'temp' ).track();
+
+const fs = require( 'fs' );
+
+const JWTTokenBuilder = require( '../../lib/builder' );
+
+const jwt = require( 'jwt-simple' );
+
+describe( 'lib/builder', function() {
+
+    describe( 'JWTTokenBuilder', function() {
+
+        describe( 'constructor', function() {
+
+            it( 'normal operation', function() {
+
+                let builder = new JWTTokenBuilder();
+
+                expect( builder._algorithm ).to.equal( 'HS256' );
+                expect( builder._claims ).to.eql( {} );
+            });
+        });
+
+        describe( '.claims', function() {
+
+            [
+                [ 'valid claims object', { iss: 'here' }, { iss: 'here' } ],
+                [ 'null claims object', null, {} ],
+                [ 'missing claims object', undefined, {} ]
+
+            ].forEach( function( testCase ) {
+
+                it( testCase[0], function() {
+
+                    let builder = new JWTTokenBuilder();
+
+                    let retValue = builder.claims( testCase[1] );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder._claims ).to.eql( testCase[2] );
+                });
+            });
+        });
+
+        describe( '.algorithm', function() {
+
+            [
+                'HS256', 'HS384', 'HS512', 'RS256'
+
+            ].forEach( function( type ) {
+
+                it( 'algorithm: ' + type, function() {
+
+                    let builder = new JWTTokenBuilder();
+
+                    let retValue = builder.algorithm( type );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder._algorithm ).to.equal( type );
+                });
+            });
+
+            it( 'fail: when algorithm is unknown', function() {
+
+                let builder = new JWTTokenBuilder();
+
+                expect( builder.algorithm.bind( builder, 'HS1024' ) ).to.throw( 'unknown algorithm' );
+            });
+        });
+
+        describe( '.secret', function() {
+
+            // should work with any algorithm
+            [
+                'HS256', 'HS384', 'HS512', 'RS256'
+
+            ].forEach( function( type ) {
+
+                it( 'setting with algorithm: ' + type, function() {
+
+                    let builder = new JWTTokenBuilder();
+
+                    builder.algorithm( type );
+
+                    let retValue = builder.secret( 'super-secret' );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder._secret ).to.exist;
+                    expect( builder._secret ).to.equal( 'super-secret' );
+                });
+            });
+        });
+
+        describe( '.privateKey', function() {
+
+            let privateKey;
+
+            before( function() {
+
+                privateKey = keypair( { bits: 1024 } ).private;
+            });
+
+            // should work with any algorithm
+            [
+                'HS256', 'HS384', 'HS512', 'RS256'
+
+            ].forEach( function( type ) {
+
+                it( 'setting with algorithm: ' + type, function() {
+
+                    let builder = new JWTTokenBuilder();
+
+                    builder.algorithm( type );
+
+                    let retValue = builder.privateKey( privateKey );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder._key ).to.exist;
+                    expect( builder._key ).to.equal( privateKey );
+                });
+            });
+        })
+
+        describe( '.privateKeyFromFile', function() {
+
+            let privateKey;
+
+            let privateKeyPath;
+
+            before( function( done ) {
+
+                privateKey = keypair( { bits: 1024 } ).private;
+
+                temp.open('priv-key', function( err, info ) {
+
+                    if( err ) {
+
+                        return done( err );
+                    }
+
+                    privateKeyPath = info.path;
+
+                    fs.writeFileSync( privateKeyPath, privateKey );
+
+                    done();
+                });
+            });
+
+            // should work with any algorithm
+            [
+                'HS256', 'HS384', 'HS512', 'RS256'
+
+            ].forEach( function( type ) {
+
+                it( 'setting with algorithm: ' + type, function() {
+
+                    let builder = new JWTTokenBuilder();
+
+                    builder.algorithm( type );
+
+                    let retValue = builder.privateKeyFromFile( privateKeyPath );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder._key ).to.exist;
+                    expect( builder._key.constructor.name ).to.equal( 'Buffer' );
+                    expect( builder._key.toString() ).to.equal( privateKey );
+                });
+            });
+        });
+
+        [
+            'iat',
+            'nbf'
+        ].forEach( function( offsetType ) {
+
+            let builderVar = '_' + offsetType;
+
+            describe( '.' + offsetType, function() {
+
+                it( 'without value', function() {
+
+                    let before = Math.floor( Date.now() / 1000 );
+
+                    let builder = new JWTTokenBuilder();
+
+                    let retValue = builder[ offsetType ]();
+
+                    let after = Math.floor( Date.now() / 1000 );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder[ builderVar ] ).to.exist;
+                    expect( builder[ builderVar ] ).to.be.at.least( before );
+                    expect( builder[ builderVar ] ).to.be.at.most( after );
+                });
+
+                it( 'with negative value', function() {
+
+                    let before = Math.floor( Date.now() / 1000 ) - 42;
+
+                    let builder = new JWTTokenBuilder();
+
+                    let retValue = builder[ offsetType ]( -42 );
+
+                    let after = Math.floor( Date.now() / 1000 ) - 42;
+
+                    expect( retValue ).to.equal( builder );
+
+                    expect( builder[ builderVar ] ).to.exist;
+                    expect( builder[ builderVar ] ).to.be.at.least( before );
+                    expect( builder[ builderVar ] ).to.be.at.most( after );
+                });
+
+                it( 'with value', function() {
+
+                    let now = Math.floor( Date.now() / 1000 );
+
+                    let builder = new JWTTokenBuilder();
+
+                    let retValue = builder[ offsetType ]( now );
+
+                    expect( retValue ).to.equal( builder );
+
+                    expect( builder[ builderVar ] ).to.equal( now );
+                });
+            });
+        });
+
+        describe( '.exp', function() {
+
+            it( 'without iat being set', function() {
+
+                let before = Math.floor( Date.now() / 1000 ) + 42;
+
+                let builder = new JWTTokenBuilder();
+
+                let retValue = builder.exp( 42 );
+
+                let after = Math.floor( Date.now() / 1000 ) + 42;
+
+                expect( retValue ).to.equal( builder );
+
+                expect( builder._exp ).to.exist;
+                expect( builder._exp ).to.be.at.least( before );
+                expect( builder._exp ).to.be.at.most( after );
+            });
+
+            it( 'with iat being set', function() {
+
+                let now = Math.floor( Date.now() / 1000 ) - 100;
+
+                let builder = new JWTTokenBuilder();
+
+                builder.iat( now );
+
+                let retValue = builder.exp( 42 );
+
+                expect( retValue ).to.equal( builder );
+
+                expect( builder._exp ).to.equal( now + 42 );
+            });
+        });
+
+        describe( '.build', function() {
+
+            [
+                'HS256', 'HS384', 'HS512'
+
+            ].forEach( function( algorithm ) {
+
+                it( 'with algorithm: ' + algorithm, function() {
+
+                    let token = new JWTTokenBuilder()
+                        .claims( { iss: 'https://auth.vandium.io' } )
+                        .iat()
+                        .exp( 100 )
+                        .algorithm( algorithm )
+                        .secret( 'super-secret' )
+                        .build();
+
+                    let claims = jwt.decode( token, 'super-secret', algorithm );
+
+                    expect( claims.iat ).to.exist;
+                    expect( claims.exp ).to.exist;
+                    expect( claims.iss ).to.equal( 'https://auth.vandium.io' );
+                });
+            });
+
+            it( 'with algorithm: RS256', function() {
+
+                let kp = keypair( { bits: 1024 } );
+
+                let token = new JWTTokenBuilder()
+                    .claims( { iss: 'https://auth.vandium.io' } )
+                    .iat()
+                    .exp( 100 )
+                    .algorithm( 'RS256' )
+                    .privateKey( kp.private )
+                    .build();
+
+                let claims = jwt.decode( token, kp.public, 'RS256' );
+
+                expect( claims.iat ).to.exist;
+                expect( claims.exp ).to.exist;
+                expect( claims.iss ).to.equal( 'https://auth.vandium.io' );
+            });
+
+            [
+                'HS256', 'HS384', 'HS512', 'RS256'
+
+            ].forEach( function( algorithm ) {
+
+                it( 'fail: when secret/key not set, algorithm: ' + algorithm, function() {
+
+                    let builder = new JWTTokenBuilder()
+                        .claims( { iss: 'https://auth.vandium.io' } )
+                        .iat()
+                        .exp( 100 )
+                        .algorithm( algorithm );
+
+                    expect( builder.build.bind( builder ) ).to.throw( 'missing' );
+                });
+            });
+        });
+    });
+});
