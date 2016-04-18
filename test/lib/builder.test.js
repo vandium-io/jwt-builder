@@ -63,6 +63,32 @@ describe( 'lib/builder', function() {
                     expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
                 });
 
+                it( 'from config, iat = false, nbf = false, algorithm: ' + algorithm, function() {
+
+                    let config = {
+
+                        algorithm,
+                        iat: false,
+                        nbf: false,
+                        secret: 'super-secret',
+                        iss: 'https://auth.vandium.io',
+                        exp: 3600
+                    };
+
+
+                    let builder = new JWTTokenBuilder( config );
+
+                    expect( builder._algorithm ).to.equal( algorithm );
+                    expect( builder._secret ).to.equal( 'super-secret' );
+
+                    expect( builder._iat ).to.not.exist;
+                    expect( builder._nbf ).to.not.exist;
+
+                    expect( builder._exp ).to.equal( 3600 );
+
+                    expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+                });
+
                 it( 'from config, algorithm: ' + algorithm, function() {
 
                     let config = {
@@ -315,6 +341,7 @@ describe( 'lib/builder', function() {
                     expect( retValue ).to.equal( builder );
 
                     expect( builder[ builderVar ] ).to.equal( now );
+                    expect( builder[ builderVar + '_relative' ] ).to.be.false;
                 });
             });
         });
@@ -349,7 +376,8 @@ describe( 'lib/builder', function() {
 
                     let token = new JWTTokenBuilder()
                         .claims( { iss: 'https://auth.vandium.io' } )
-                        .iat()
+                        .iat( Date.now() )
+                        .nbf()
                         .exp( 100 )
                         .algorithm( algorithm )
                         .secret( 'super-secret' )
