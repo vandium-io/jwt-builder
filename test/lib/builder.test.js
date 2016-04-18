@@ -46,23 +46,19 @@ describe( 'lib/builder', function() {
                         exp: 3600
                     };
 
-                    let before = Math.floor( Date.now() / 1000 );
 
                     let builder = new JWTTokenBuilder( config );
-
-                    let after = Math.floor( Date.now() / 1000 );
 
                     expect( builder._algorithm ).to.equal( algorithm );
                     expect( builder._secret ).to.equal( 'super-secret' );
 
-                    expect( builder._iat ).to.be.at.least( before );
-                    expect( builder._iat ).to.be.at.most( after );
+                    expect( builder._iat ).to.equal( 0 );
+                    expect( builder._iat_relative ).to.equal( true );
 
-                    expect( builder._nbf ).to.be.at.least( before );
-                    expect( builder._nbf ).to.be.at.most( after );
+                    expect( builder._nbf ).to.equal( 0 );
+                    expect( builder._nbf_relative ).to.equal( true );
 
-                    expect( builder._exp ).to.be.at.least( before + 3600 );
-                    expect( builder._exp ).to.be.at.most( after + 3600 );
+                    expect( builder._exp ).to.equal( 3600 );
 
                     expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
                 });
@@ -86,7 +82,7 @@ describe( 'lib/builder', function() {
 
                     expect( builder._iat).to.equal( config.iat );
                     expect( builder._nbf ).to.equal( config.nbf );
-                    expect( builder._exp ).to.equal( config.iat + 3600 );
+                    expect( builder._exp ).to.equal( 3600 );
 
                     expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
                 });
@@ -113,7 +109,7 @@ describe( 'lib/builder', function() {
 
                 expect( builder._iat).to.equal( config.iat );
                 expect( builder._nbf ).to.equal( config.nbf );
-                expect( builder._exp ).to.equal( config.iat + 3600 );
+                expect( builder._exp ).to.equal( 3600 );
 
                 expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
             });
@@ -287,8 +283,8 @@ describe( 'lib/builder', function() {
 
                     expect( retValue ).to.equal( builder );
                     expect( builder[ builderVar ] ).to.exist;
-                    expect( builder[ builderVar ] ).to.be.at.least( before );
-                    expect( builder[ builderVar ] ).to.be.at.most( after );
+                    expect( builder[ builderVar ] ).to.equal( 0 );
+                    expect( builder[ builderVar + '_relative' ] ).to.be.true;
                 });
 
                 it( 'with negative value', function() {
@@ -304,8 +300,8 @@ describe( 'lib/builder', function() {
                     expect( retValue ).to.equal( builder );
 
                     expect( builder[ builderVar ] ).to.exist;
-                    expect( builder[ builderVar ] ).to.be.at.least( before );
-                    expect( builder[ builderVar ] ).to.be.at.most( after );
+                    expect( builder[ builderVar ] ).to.equal( -42 );
+                    expect( builder[ builderVar + '_relative' ] ).to.be.true;
                 });
 
                 it( 'with value', function() {
@@ -338,23 +334,7 @@ describe( 'lib/builder', function() {
                 expect( retValue ).to.equal( builder );
 
                 expect( builder._exp ).to.exist;
-                expect( builder._exp ).to.be.at.least( before );
-                expect( builder._exp ).to.be.at.most( after );
-            });
-
-            it( 'with iat being set', function() {
-
-                let now = Math.floor( Date.now() / 1000 ) - 100;
-
-                let builder = new JWTTokenBuilder();
-
-                builder.iat( now );
-
-                let retValue = builder.exp( 42 );
-
-                expect( retValue ).to.equal( builder );
-
-                expect( builder._exp ).to.equal( now + 42 );
+                expect( builder._exp ).to.equal( 42 );
             });
         });
 
