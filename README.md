@@ -19,7 +19,7 @@ Install via npm.
 If you only need to create a single JWT, then you can pass a configuration object to the builder:
 
 ```js
-'use strict`
+'use strict'
 
 const jwtBuilder = require( 'jwt-builder' );
 
@@ -46,8 +46,8 @@ let builder = jwtBuilder()
                 .algorithm( 'HS256' )
                 .secret( 'super-secret' )
                 .build();
-                
-                
+
+
 let tokenUser1 = builder.claims( {
 	                		iss: 'https://auth.vandium.io',
 	                		userId: '539e4cba-4893-428a-bafd-1110f023514f'
@@ -66,14 +66,14 @@ let tokenUser2 = builder.claims( {
 Tokens can be generated using a configuration object as follows:
 
 ```js
-'use strict`
+'use strict'
 
 const jwtBuilder = require( 'jwt-builder' );
 
 let token = jwtBuilder( {
-				
+
 				// configuration options here
-					
+
 			});
 ```
 
@@ -87,10 +87,10 @@ The following properties are available when creating tokens using a configuratio
 | algorithm    | Algorithm type. Can be one of the following: HS256, HS384, HS512 or RS256. Algorithms prefixed with "HS" use a symetric key, where as "RS256" uses a private key to sign and a public key for verification. Defaults to HS256|
 | secret       | Secret key for use with algorithms: HS256, HS384 and RS512. Required when algorithms is prefixed with "HS"|
 | privateKey   | Private key use with RS256 algorithm. Required when when algorithm is RS256.|
-| iat          | iat (issued at time). Can be set to true or 0 to use current time or a specified value in seconds. |
+| iat          | iat (issued at time). Can be set to true or 0 to use current time or a specified value in seconds |
 | nbf          | nbf (not before time). Can be set to true or 0 to use current time or a specified value in seconds. |
 | exp          | exp (expiry time). Offset from the current time in seconds |
-| *user_value* | Can be any user value other than the ones above.           | 
+| *user_value* | Can be any user value other than the ones above.           |
 
 
 
@@ -160,11 +160,14 @@ builder.claims( {
 
 ***
 
-#### `.build()
+#### `.build()`
 
 Generates the token. This method can be called multiple times to generate new tokens.
 
 
+## Time Values
+
+Values that are less than `1451606400` (Jan 1, 2016 0:00:00 GMT) will be treated as offsets. If they are equal or greater, then they will be absolute.
 
 
 ## License
