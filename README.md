@@ -44,8 +44,7 @@ let builder = jwtBuilder()
                 .nbf()             // can't be used before current time
                 .exp( 3600 )       // expire in 1 hour
                 .algorithm( 'HS256' )
-                .secret( 'super-secret' )
-                .build();
+                .secret( 'super-secret' );
 
 
 let tokenUser1 = builder.claims( {
