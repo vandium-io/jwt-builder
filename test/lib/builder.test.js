@@ -45,7 +45,7 @@ describe( 'lib/builder', function() {
                         iss: 'https://auth.vandium.io',
                         headers: {
 
-                            kid: '123'
+                            kid: '2016-11-17'
                         },
                         exp: 3600
                     };
@@ -65,6 +65,8 @@ describe( 'lib/builder', function() {
                     expect( builder._exp ).to.equal( 3600 );
 
                     expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+
+                    expect( builder._headers ).to.eql( { kid: '2016-11-17' } );
                 });
 
                 it( 'from config, iat = false, nbf = false, algorithm: ' + algorithm, function() {
@@ -78,7 +80,7 @@ describe( 'lib/builder', function() {
                         iss: 'https://auth.vandium.io',
                         headers: {
 
-                            kid: '123'
+                            kid: '2016-11-17'
                         },
                         exp: 3600
                     };
@@ -95,6 +97,8 @@ describe( 'lib/builder', function() {
                     expect( builder._exp ).to.equal( 3600 );
 
                     expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+
+                    expect( builder._headers ).to.eql( { kid: '2016-11-17' } );
                 });
 
                 it( 'from config, algorithm: ' + algorithm, function() {
@@ -108,7 +112,7 @@ describe( 'lib/builder', function() {
                         iss: 'https://auth.vandium.io',
                         headers: {
 
-                            kid: '123'
+                            kid: '2016-11-17'
                         },
                         exp: 3600
                     };
@@ -123,6 +127,8 @@ describe( 'lib/builder', function() {
                     expect( builder._exp ).to.equal( 3600 );
 
                     expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+
+                    expect( builder._headers ).to.eql( { kid: '2016-11-17' } );
                 });
             });
 
@@ -139,7 +145,7 @@ describe( 'lib/builder', function() {
                     iss: 'https://auth.vandium.io',
                     headers: {
 
-                        kid: '123'
+                        kid: '2016-11-17'
                     },
                     exp: 3600
                 };
@@ -154,6 +160,8 @@ describe( 'lib/builder', function() {
                 expect( builder._exp ).to.equal( 3600 );
 
                 expect( builder._claims ).to.eql( { iss: 'https://auth.vandium.io' } );
+
+                expect( builder._headers ).to.eql( { kid: '2016-11-17' } );
             });
         });
 

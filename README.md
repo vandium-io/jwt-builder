@@ -29,7 +29,11 @@ let token = jwtBuilder( {
 				nbf: true,
 				exp: 3600,
 				iss: 'https://auth.vandium.io',
-				userId: '539e4cba-4893-428a-bafd-1110f023514f'
+				userId: '539e4cba-4893-428a-bafd-1110f023514f',
+				headers: {
+
+					kid: '2016-11-17'
+				}
 			});
 ```
 
@@ -51,12 +55,18 @@ let tokenUser1 = builder.claims( {
 	                		iss: 'https://auth.vandium.io',
 	                		userId: '539e4cba-4893-428a-bafd-1110f023514f'
 	                	})
+                        .headers( {
+                            kid: '2016-11-17'
+                        })
 	                .build();
 
 let tokenUser2 = builder.claims( {
 	                		iss: 'https://auth.vandium.io',
 	                		userId: 'd24e1e20-4058-4cd2-87dd-2ba64414f4af'
 	                	})
+                        .headers( {
+                            kid: '2016-11-17'
+                        })
 	                .build();
 ```
 
@@ -89,7 +99,8 @@ The following properties are available when creating tokens using a configuratio
 | iat          | iat (issued at time). Can be set to true or 0 to use current time or a specified value in seconds |
 | nbf          | nbf (not before time). Can be set to true or 0 to use current time or a specified value in seconds. |
 | exp          | exp (expiry time). Offset from the current time in seconds |
-| *user_value* | Can be any user value other than the ones above.           |
+| headers      | Object of key value pairs to include in the header of the token |
+| *user_value* | Can be any user value other than the ones above. |
 
 
 
@@ -154,6 +165,19 @@ Claims to add to the token. The object contains one or more key value pairs.
 builder.claims( {
 
 	userId: 'd24e1e20-4058-4cd2-87dd-2ba64414f4af'
+});
+```
+
+***
+
+#### `.headers( object )`
+
+Headers to add to the token. The object contains one or more key value pairs.
+
+```js
+builder.headers( {
+
+	kid: '2016-11-17'
 });
 ```
 
