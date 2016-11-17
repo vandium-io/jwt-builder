@@ -421,7 +421,7 @@ describe( 'lib/builder', function() {
 
                     let token = new JWTTokenBuilder()
                         .claims( { iss: 'https://auth.vandium.io' } )
-                        .headers( { key: '123' } )
+                        .headers( { kid: '2016-11-17' } )
                         .iat( Date.now() )
                         .nbf()
                         .exp( 100 )
@@ -434,6 +434,10 @@ describe( 'lib/builder', function() {
                     expect( claims.iat ).to.exist;
                     expect( claims.exp ).to.exist;
                     expect( claims.iss ).to.equal( 'https://auth.vandium.io' );
+
+                    let headers = JSON.parse( new Buffer( token.split( '.')[0], 'base64' ).toString() );
+
+                    expect( headers.kid ).to.equal( '2016-11-17' );
                 });
             });
 
@@ -443,7 +447,7 @@ describe( 'lib/builder', function() {
 
                 let token = new JWTTokenBuilder()
                     .claims( { iss: 'https://auth.vandium.io' } )
-                    .headers( { key: '123' } )
+                    .headers( { kid: '2016-11-17' } )
                     .iat()
                     .exp( 100 )
                     .algorithm( 'RS256' )
@@ -455,6 +459,10 @@ describe( 'lib/builder', function() {
                 expect( claims.iat ).to.exist;
                 expect( claims.exp ).to.exist;
                 expect( claims.iss ).to.equal( 'https://auth.vandium.io' );
+
+                let headers = JSON.parse( new Buffer( token.split( '.')[0], 'base64' ).toString() );
+
+                expect( headers.kid ).to.equal( '2016-11-17' );
             });
 
             [
@@ -466,7 +474,7 @@ describe( 'lib/builder', function() {
 
                     let builder = new JWTTokenBuilder()
                         .claims( { iss: 'https://auth.vandium.io' } )
-                        .headers( { key: '123' } )
+                        .headers( { kid: '2016-11-17' } )
                         .iat()
                         .exp( 100 )
                         .algorithm( algorithm );
