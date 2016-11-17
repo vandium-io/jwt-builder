@@ -43,6 +43,10 @@ describe( 'lib/builder', function() {
                         nbf: true,
                         secret: 'super-secret',
                         iss: 'https://auth.vandium.io',
+                        headers: {
+
+                            kid: '123'
+                        },
                         exp: 3600
                     };
 
@@ -72,6 +76,10 @@ describe( 'lib/builder', function() {
                         nbf: false,
                         secret: 'super-secret',
                         iss: 'https://auth.vandium.io',
+                        headers: {
+
+                            kid: '123'
+                        },
                         exp: 3600
                     };
 
@@ -98,6 +106,10 @@ describe( 'lib/builder', function() {
                         nbf: Math.floor( Date.now() / 1000 ),
                         secret: 'super-secret',
                         iss: 'https://auth.vandium.io',
+                        headers: {
+
+                            kid: '123'
+                        },
                         exp: 3600
                     };
 
@@ -125,6 +137,10 @@ describe( 'lib/builder', function() {
                     nbf: Math.floor( Date.now() / 1000 ),
                     privateKey,
                     iss: 'https://auth.vandium.io',
+                    headers: {
+
+                        kid: '123'
+                    },
                     exp: 3600
                 };
 
@@ -158,6 +174,27 @@ describe( 'lib/builder', function() {
 
                     expect( retValue ).to.equal( builder );
                     expect( builder._claims ).to.eql( testCase[2] );
+                });
+            });
+        });
+
+        describe( '.headers', function() {
+
+            [
+                [ 'valid headers object', { kid: '123' }, { kid: '123' } ],
+                [ 'null headers object', null, {} ],
+                [ 'missing headers object', undefined, {} ]
+
+            ].forEach( function( testCase ) {
+
+                it( testCase[ 0 ], function() {
+
+                    let builder = new JWTTokenBuilder();
+
+                    let retValue = builder.headers( testCase[ 1 ] );
+
+                    expect( retValue ).to.equal( builder );
+                    expect( builder._headers ).to.eql( testCase[ 2 ] );
                 });
             });
         });
@@ -376,6 +413,7 @@ describe( 'lib/builder', function() {
 
                     let token = new JWTTokenBuilder()
                         .claims( { iss: 'https://auth.vandium.io' } )
+                        .headers( { key: '123' } )
                         .iat( Date.now() )
                         .nbf()
                         .exp( 100 )
@@ -397,6 +435,7 @@ describe( 'lib/builder', function() {
 
                 let token = new JWTTokenBuilder()
                     .claims( { iss: 'https://auth.vandium.io' } )
+                    .headers( { key: '123' } )
                     .iat()
                     .exp( 100 )
                     .algorithm( 'RS256' )
@@ -419,6 +458,7 @@ describe( 'lib/builder', function() {
 
                     let builder = new JWTTokenBuilder()
                         .claims( { iss: 'https://auth.vandium.io' } )
+                        .headers( { key: '123' } )
                         .iat()
                         .exp( 100 )
                         .algorithm( algorithm );
